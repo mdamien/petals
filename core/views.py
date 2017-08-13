@@ -48,8 +48,12 @@ def index(request):
             # todo: atomize / transaction
             # todo: validate email
             dest_email = request.POST['email']
-            dest_amount = int(request.POST['amount'])
-            if account.amount >= dest_amount: # TODO: else "not enough founds"
+            dest_amount = -1
+            try:
+                dest_amount = int(request.POST['amount'])
+            except ValueError:
+                pass
+            if account.amount >= dest_amount and dest_amount > 0: # TODO: else "not enough founds"
                 try:
                     dest_account = Account.objects.get(email=dest_email)
                     dest_account.amount += dest_amount
@@ -113,7 +117,7 @@ https://petals.dam.io/?token=%s&email=%s
             L.div('.row') / (
                 L.div('.col-sm-3') / (
                     L.h3 / 'see you account',
-                    L.p / 'You have will receive an email with a magic link',
+                    L.p / 'You will receive an email with a connection link',
                     L.form(method='post') / (
                         L.input(type='hidden', name='csrfmiddlewaretoken', value=get_token(request)),
                         L.div / (
