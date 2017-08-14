@@ -33,6 +33,7 @@ def tpl_base(*content, title=''):
 
 def index(request):
     email = None
+    message = None
 
     if 'token' in request.GET:
         try:
@@ -49,6 +50,7 @@ def index(request):
             # todo: validate email
             dest_email = request.POST['email']
             dest_amount = -1
+            message = 'invalid amount'
             try:
                 dest_amount = int(request.POST['amount'])
             except ValueError:
@@ -67,6 +69,7 @@ def index(request):
                     dest_account = Account.objects.create(email=dest_email, amount=dest_amount)
                 account.amount -= dest_amount
                 account.save()
+                message = '%d sent' % dest_amount
     else:
         if request.method == 'POST':
             email = request.POST['email']
@@ -77,6 +80,7 @@ def index(request):
                 send_mail('[petals.dam.io] link to connect to your account', """Here is a temporary link to connect to your account:
 https://petals.dam.io/?token=%s&email=%s
 """ % (token, email), 'petals@dam.io', [email], fail_silently=False)
+                message = 'connection link sent to %s' % email
             except Account.DoesNotExist:
                 pass
         email = None # lol
@@ -111,6 +115,7 @@ https://petals.dam.io/?token=%s&email=%s
                         L.br,
                         L.button(type='submit') / 'send',
                     ),
+                    L.i / message,
                 ),
             )
         ) if email else (
@@ -126,6 +131,7 @@ https://petals.dam.io/?token=%s&email=%s
                         L.br,
                         L.button(type='submit') / 'send'
                     ),
+                    L.i / message,
                 ),
             )
         )
