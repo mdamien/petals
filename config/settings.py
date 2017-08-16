@@ -79,7 +79,4 @@ USE_L10N = True
 USE_TZ = True
 
 STATIC_URL = '/static/'
-
-EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 STATIC_ROOT = os.path.join(BASE_DIR, 'collected_static')
-

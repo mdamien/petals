@@ -1,3 +1,4 @@
 *.sqlite3
 *.pyc
 collected_static
+config/prod_secrets.py
