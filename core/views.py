@@ -61,7 +61,7 @@ def index(request):
                     dest_account.amount += dest_amount
                     dest_account.save()
 
-                    send_mail('[petals.dam.io] %s sent you %d petals' % (email, dest_amount), """%s sent you %d petals.
+                    send_mail('[petals] %s sent you %d petals' % (email, dest_amount), """%s sent you %d petals.
     You current balance is now: %d petals
     http://petal.x.dam.io/
     """ % (email, dest_amount, dest_account.amount), 'petals@dam.io', [dest_email], fail_silently=False)
@@ -77,7 +77,7 @@ def index(request):
                 account = Account.objects.get(email=email)
                 token = get_random_string()
                 LoginToken.objects.create(email=email, token=token, expire_on=datetime.date.today() + datetime.timedelta(days=1))
-                send_mail('[petals.dam.io] link to connect to your account', """Here is a temporary link to connect to your account:
+                send_mail('[petals] link to connect to your account', """Here is a temporary link to connect to your account:
 http://petal.x.dam.io/?token=%s&email=%s
 """ % (token, email), 'petals@dam.io', [email], fail_silently=False)
                 message = 'connection link sent to %s' % email
