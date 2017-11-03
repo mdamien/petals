@@ -23,6 +23,7 @@ def tpl_base(*content, title=''):
         L.html / (
             L.head / (
                 L.meta(charset='utf-8'),
+                L.meta(name="viewport",content="width=device-width, initial-scale=1"),
                 L.title / (((title + ' - ') if title else '') + 'Petal'),
                 L.link(rel='stylesheet', href="/static/css/bootstrap.css"),
                 L.link(rel='stylesheet', href="/static/css/base.css"),
