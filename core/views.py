@@ -59,23 +59,23 @@ def index(request):
                 pass
             optional_message = ''
             if request.POST['message']:
-                optional_message = '\nHis message:' + slugify(request.POST['message'][:140], allow_unicode=True)
+                optional_message = '\nHis message: \n' + slugify(request.POST['message'][:140], allow_unicode=True)
             if account.amount >= dest_amount and dest_amount > 0: # TODO: else "not enough founds"
                 try:
                     dest_account = Account.objects.get(email=dest_email)
                     dest_account.amount += dest_amount
                     dest_account.save()
-
-                    token = get_random_string()
-                    LoginToken.objects.create(email=email, token=token, expire_on=datetime.date.today() + datetime.timedelta(days=1))
-
-                    send_mail('[petals] %s sent you %d petals' % (email, dest_amount), """%s sent you %d petals.%s
-    You current balance is now: %d petals
-
-    http://petal.x.dam.io/?token=%s&email=%s
-    """ % (email, dest_amount, optional_message, dest_account.amount, token, email), 'petals@dam.io', [dest_email], fail_silently=False)
                 except Account.DoesNotExist:
                     dest_account = Account.objects.create(email=dest_email, amount=dest_amount)
+
+                token = get_random_string()
+                LoginToken.objects.create(email=dest_email, token=token, expire_on=datetime.date.today() + datetime.timedelta(days=1))
+
+                send_mail('[petals] %s sent you %d petals' % (email, dest_amount), """%s sent you %d petals.%s
+You current balance is now: %d petals
+
+http://petal.x.dam.io/?token=%s&email=%s
+""" % (email, dest_amount, optional_message, dest_account.amount, token, dest_email), 'petals@dam.io', [dest_email], fail_silently=False)
                 account.amount -= dest_amount
                 account.save()
                 message = '%d sent' % dest_amount
