@@ -4,6 +4,7 @@ from django.http import HttpResponse
 from django.middleware.csrf import get_token
 from django.core.mail import send_mail
 from django.utils.crypto import get_random_string
+from django.utils.text import slugify
 
 from lys import L, render, raw
 
@@ -55,16 +56,23 @@ def index(request):
                 dest_amount = int(request.POST['amount'])
             except ValueError:
                 pass
+            optional_message = ''
+            if request.POST['message']:
+                optional_message = '\nHis message:' + slugify(request.POST['message'][:140], allow_unicode=True)
             if account.amount >= dest_amount and dest_amount > 0: # TODO: else "not enough founds"
                 try:
                     dest_account = Account.objects.get(email=dest_email)
                     dest_account.amount += dest_amount
                     dest_account.save()
 
-                    send_mail('[petals] %s sent you %d petals' % (email, dest_amount), """%s sent you %d petals.
+                    token = get_random_string()
+                    LoginToken.objects.create(email=email, token=token, expire_on=datetime.date.today() + datetime.timedelta(days=1))
+
+                    send_mail('[petals] %s sent you %d petals' % (email, dest_amount), """%s sent you %d petals.%s
     You current balance is now: %d petals
-    http://petal.x.dam.io/
-    """ % (email, dest_amount, dest_account.amount), 'petals@dam.io', [dest_email], fail_silently=False)
+
+    http://petal.x.dam.io/?token=%s&email=%s
+    """ % (email, dest_amount, optional_message, dest_account.amount, token, email), 'petals@dam.io', [dest_email], fail_silently=False)
                 except Account.DoesNotExist:
                     dest_account = Account.objects.create(email=dest_email, amount=dest_amount)
                 account.amount -= dest_amount
@@ -109,11 +117,11 @@ http://petal.x.dam.io/?token=%s&email=%s
                         L.div / (
                             L.label('control-label') / 'amount', L.br, L.input(name='amount', type='number'),
                         ),
-                        # L.div / (
-                        #     L.label('control-label') / 'message (optional)', L.br, L.input(name='message', max_length="140"),
-                        # ),
+                        L.div / (
+                            L.label('control-label') / 'message (optional)', L.br, L.input(name='message', max_length="140"),
+                        ),
                         L.br,
-                        L.button(type='submit') / 'send',
+                        L.button(type='submit') / 'send petals',
                     ),
                     L.i / message,
                 ),
@@ -122,14 +130,14 @@ http://petal.x.dam.io/?token=%s&email=%s
             L.div('.row') / (
                 L.div('.col-sm-3') / (
                     L.h3 / 'see you account',
-                    L.p / 'You will receive an email with a connection link',
+                    L.p / 'You will receive an email with a link to login to your account',
                     L.form(method='post') / (
                         L.input(type='hidden', name='csrfmiddlewaretoken', value=get_token(request)),
                         L.div / (
                             L.label('control-label') / 'email', L.br, L.input(name='email'),
                         ),
                         L.br,
-                        L.button(type='submit') / 'send'
+                        L.button(type='submit') / 'send email with login link'
                     ),
                     L.i / message,
                 ),
