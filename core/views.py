@@ -130,7 +130,7 @@ http://petal.x.dam.io/?token=%s&email=%s
         ) if email else (
             L.div('.row') / (
                 L.div('.col-sm-3') / (
-                    L.h3 / 'see you account',
+                    L.h3 / 'see your account',
                     L.p / 'You will receive an email with a link to login to your account',
                     L.form(method='post') / (
                         L.input(type='hidden', name='csrfmiddlewaretoken', value=get_token(request)),
